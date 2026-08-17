@@ -78,13 +78,14 @@ function isSameLocalDay(timestamp: number, now = new Date()): boolean {
     && cachedDate.getDate() === now.getDate()
 }
 
-/** 获取缓存；仅当缓存不是今天的数据时才联网刷新 */
+/** 获取缓存；缓存未满 3 小时直接复用，过期后联网刷新 */
 export async function getElectricityData(forceRefresh = false) {
   const cachedData = getCachedData()
+  const cacheMaxAge = 3 * 60 * 60 * 1000
+  const cacheAge = cachedData ? Date.now() - Number(cachedData.timestamp) : Infinity
 
-  // 先检查缓存时间：当天数据直接展示，跨日数据才联网刷新。
-  if (cachedData && !forceRefresh && isSameLocalDay(Number(cachedData.timestamp))) {
-    console.log('[API] Using today\'s cached data')
+  if (cachedData && !forceRefresh && cacheAge >= 0 && cacheAge < cacheMaxAge) {
+    console.log(`[API] Using cached data, age=${Math.round(cacheAge / 60000)}min`)
     return { data: cachedData.data, timestamp: cachedData.timestamp }
   }
 
