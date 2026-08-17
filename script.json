@@ -1,0 +1,53 @@
+{
+  "runInApp" : false,
+  "description" : "国家电网电费查询小组件",
+  "icon" : "bolt.shield",
+  "iconImage" : "https:\/\/raw.githubusercontent.com\/Honye\/scriptable-scripts\/master\/static\/sgcc.png",
+  "color" : "rgba(0, 112, 107, 1)",
+  "localizedNames" : {
+    "ja" : "",
+    "pt" : "",
+    "it" : "",
+    "fr" : "",
+    "de" : "",
+    "en" : "State Grid",
+    "zh" : "网上国网",
+    "ru" : "",
+    "es" : ""
+  },
+  "version" : "2.1",
+  "entry" : "index.tsx",
+  "intentInputTypes" : [
+
+  ],
+  "name" : "网上国网",
+  "permissions" : null,
+  "author" : {
+    "email" : "lchen@lchen.ac.cn",
+    "homepage" : "https:\/\/github.com\/Primovist",
+    "name" : "LChen"
+  },
+  "contributors" : [
+    {
+      "name" : "monkey-sking",
+      "email" : null,
+      "homepage" : "https:\/\/github.com\/monkey-sking\/sgcc"
+    },
+    {
+      "name" : "LChen",
+      "email" : "lchen@lchen.ac.cn",
+      "homepage" : "https:\/\/github.com\/Primovist"
+    }
+  ],
+  "localizedDescriptions" : {
+    "ja" : "",
+    "pt" : "",
+    "ru" : "",
+    "zh" : "查询国家电网电费余额和用电量",
+    "fr" : "",
+    "it" : "",
+    "es" : "",
+    "en" : "Query State Grid electricity bill and usage",
+    "de" : ""
+  }
+}
