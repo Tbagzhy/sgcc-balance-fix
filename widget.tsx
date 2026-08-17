@@ -775,7 +775,8 @@ async function render() {
 
     const accountIndex = getWidgetAccountIndex()
     console.log('[Widget] Account index:', accountIndex)
-    const rawData = await getAccountData(false, accountIndex)
+    // 桌面组件每次被系统唤醒时优先联网；失败时 API 层仍会回退到旧缓存。
+    const rawData = await getAccountData(true, accountIndex)
     console.log('[Widget] Raw data received, keys:', Object.keys(rawData || {}))
     console.log('[Widget] stepElecQuantity:', JSON.stringify(rawData?.stepElecQuantity || []))
 
@@ -805,7 +806,7 @@ async function render() {
       {
         reloadPolicy: {
           policy: "after",
-          date: new Date(Date.now() + Math.max(15, settings.refreshInterval) * 60 * 1000)
+          date: new Date(Date.now() + Math.max(15, Math.min(30, settings.refreshInterval)) * 60 * 1000)
         }
       }
     )
