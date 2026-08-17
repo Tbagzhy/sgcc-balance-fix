@@ -30,9 +30,9 @@ const LOGO_URL = "https://raw.githubusercontent.com/Honye/scriptable-scripts/mas
 const LOGO_FILENAME = "sgcc_logo_cache.png"
 
 const C = {
-  teal: "#00706B" as any,
-  yellow: "#E8C70B" as any,
-  orange: "#D0580D" as any,
+  teal: "#00C2B8" as any,
+  yellow: "#FFD60A" as any,
+  orange: "#FF7A1A" as any,
   textPrimary: { light: "#18231C", dark: "#FFFFFF" } as any,
   textSecondary: { light: "rgba(24, 35, 28, 0.7)", dark: "rgba(255, 255, 255, 0.7)" } as any,
   bgCard: { light: "#ffffff", dark: "#1C1C1E" } as any,
@@ -133,6 +133,11 @@ async function getLogoPath() {
 
 // --- UI 组件 ---
 
+function fmt1(value: any): string {
+  const n = Number(value)
+  return Number.isFinite(n) ? n.toFixed(1) : String(value ?? '0.0')
+}
+
 // --- UI 组件 ---
 
 // --- UI 组件 ---
@@ -162,8 +167,8 @@ function BarChart({ data }: { data: BarData[] }) {
   const minValNumber = Math.min(...values)
   const maxIndex = values.lastIndexOf(max)
   const minIndex = values.lastIndexOf(minValNumber)
-  const maxColor = { light: "#E53935", dark: "#FF6B6B" } as any
-  const minColor = { light: "#66C0BC", dark: "#1A5B58" } as any
+  const maxColor = { light: "#FF3B30", dark: "#FF453A" } as any
+  const minColor = { light: "#34D399", dark: "#30D158" } as any
 
   // Adjust height to save space (SGCC Medium uses 40)
   const height = isAccessoryRectangular ? 48 : isSmall ? rpt(50) : rpt(40)
@@ -208,7 +213,7 @@ function BarChart({ data }: { data: BarData[] }) {
     } else if (ratio > 0.5) {
       color = C.teal
     } else {
-      color = { light: "#2F9A95", dark: "#0F3F3C" }
+      color = { light: "#00D4C8", dark: "#00C2B8" }
     }
 
     return (
@@ -437,8 +442,8 @@ function LineChart({ data, height = 120, isMonthly = false }: { data: BarData[];
   // 找出最大/最小值的索引（如果有多个，标记最近的一个）
   const maxIndex = values.lastIndexOf(max)
   const minIndex = values.lastIndexOf(minValNumber)
-  const maxColor = { light: "#E53935", dark: "#FF6B6B" } as any
-  const minColor = { light: "#66C0BC", dark: "#1A5B58" } as any
+  const maxColor = { light: "#FF3B30", dark: "#FF453A" } as any
+  const minColor = { light: "#34D399", dark: "#30D158" } as any
 
   // 生成柱子
   const bars = data.map((d, i) => {
@@ -461,7 +466,7 @@ function LineChart({ data, height = 120, isMonthly = false }: { data: BarData[];
       color = C.teal   // 50%-85%: 主题青色 (正常)
     } else {
       // <=50%: 介于最小值淡绿和主题青色之间的中绿色
-      color = { light: "#2F9A95", dark: "#0F3F3C" }
+      color = { light: "#00D4C8", dark: "#00C2B8" }
     }
 
     return (
@@ -551,6 +556,10 @@ function WidgetView({ displayData, barData, largeWidgetData, settings, logoPath,
   const family = Widget.family
   const isTransparent = isTransparentWidget
   const { balance, hasArrear, lastBill, lastUsage, yearBill, yearUsage, totalYearPq, currentMonthUsage } = displayData
+  const balanceText = fmt1(balance)
+  const lastBillText = fmt1(lastBill)
+  const lastUsageText = fmt1(lastUsage)
+  const currentMonthUsageText = fmt1(currentMonthUsage)
 
   const Logo = () => logoPath ? (
     <Image filePath={logoPath} resizable frame={{ width: rpt(30), height: rpt(30) }} clipShape={{ type: "capsule", style: "continuous" }} />
@@ -573,7 +582,7 @@ function WidgetView({ displayData, barData, largeWidgetData, settings, logoPath,
     return (
       <VStack alignment="center" spacing={1}>
         <Logo />
-        <Text font={12} fontWeight="bold" lineLimit={1} minScaleFactor={0.6}>{currentMonthUsage.toFixed(0)}</Text>
+        <Text font={12} fontWeight="bold" lineLimit={1} minScaleFactor={0.6}>{fmt1(currentMonthUsage)}</Text>
         <Text font={8} foregroundStyle={C.textSecondary} lineLimit={1}>本月用量</Text>
       </VStack>
     )
@@ -609,7 +618,7 @@ function WidgetView({ displayData, barData, largeWidgetData, settings, logoPath,
           <VStack
             spacing={4}
             alignment="center"
-            widgetBackground={isTransparentWidget ? undefined : contentBgStyle}
+            widgetBackground={undefined}
           >
             <BarChart data={barData} />
             <VStack padding={{ horizontal: rpt(8), bottom: rpt(8) }}>
@@ -621,10 +630,10 @@ function WidgetView({ displayData, barData, largeWidgetData, settings, logoPath,
 
           {/* Bottom Info */}
           <VStack alignment="leading" spacing={2}>
-            <Text font={rpt(11)} foregroundStyle={C.textSecondary} lineLimit={1}>本月用量 {Number(currentMonthUsage || 0).toFixed(0)} 度</Text>
-            <Text font={rpt(12)} foregroundStyle={C.textSecondary}>{lastBill !== "0.00" ? `余额(上期:${lastBill})` : '剩余电费'}</Text>
+            <Text font={rpt(11)} foregroundStyle={C.textSecondary} lineLimit={1}>本月用量 {currentMonthUsageText} 度</Text>
+            <Text font={rpt(12)} foregroundStyle={C.textSecondary}>{Number(lastBill || 0) !== 0 ? `余额(上期:${lastBillText})` : '剩余电费'}</Text>
             <HStack alignment="center">
-              <Text font={rpt(24)} fontWeight="bold" fontDesign="rounded" foregroundStyle={C.textPrimary} minScaleFactor={0.5} lineLimit={1}>{balance}</Text>
+              <Text font={rpt(24)} fontWeight="bold" fontDesign="rounded" foregroundStyle={C.textPrimary} minScaleFactor={0.5} lineLimit={1}>{balanceText}</Text>
               <Spacer />
               <Logo />
             </HStack>
@@ -658,7 +667,7 @@ function WidgetView({ displayData, barData, largeWidgetData, settings, logoPath,
           )}
           <Text font={16} fontWeight="semibold" foregroundStyle={C.textPrimary}>{rangeLabel}</Text>
           <Spacer />
-          <Text font={12} foregroundStyle={C.textSecondary}>{!hasArrear ? '余额' : '欠费'}: {balance}元</Text>
+          <Text font={12} foregroundStyle={C.textSecondary}>{!hasArrear ? '余额' : '欠费'}: {balanceText}元</Text>
         </HStack>
 
         {/* 折线图 - 占满剩余空间 */}
@@ -705,7 +714,7 @@ function WidgetView({ displayData, barData, largeWidgetData, settings, logoPath,
               {/* @ts-ignore */}
               <Image filePath={logoPath} frame={{ width: rpt(30), height: rpt(30) }} cornerRadius={rpt(15) as any} resizable />
               <Text font={rpt(10)} foregroundStyle={C.textSecondary}>{!hasArrear ? '剩余电费' : '待缴电费'}</Text>
-              <Text font={rpt(22)} fontWeight="heavy" fontDesign="rounded" foregroundStyle={C.textPrimary} lineLimit={1} minScaleFactor={0.5}>{balance}</Text>
+              <Text font={rpt(22)} fontWeight="heavy" fontDesign="rounded" foregroundStyle={C.textPrimary} lineLimit={1} minScaleFactor={0.5}>{balanceText}</Text>
             </VStack>
             <Spacer />
             <BarChart data={barData} />
@@ -717,7 +726,7 @@ function WidgetView({ displayData, barData, largeWidgetData, settings, logoPath,
           <VStack spacing={rpt(6)} frame={{ maxWidth: Infinity, maxHeight: Infinity }} alignment="leading">
             <HStack spacing={rpt(8)} frame={{ maxWidth: Infinity, maxHeight: Infinity }}>
               <GridItem label="上期电费" value={lastBill} />
-              <GridItem label="上期电量" value={lastUsage} />
+              <GridItem label="上期电量" value={lastUsageText} />
             </HStack>
             <HStack spacing={rpt(8)} frame={{ maxWidth: Infinity, maxHeight: Infinity }}>
               <GridItem label="年度电费" value={yearBill} />
@@ -735,7 +744,7 @@ function WidgetView({ displayData, barData, largeWidgetData, settings, logoPath,
                 <GridItem label="年度电费" value={yearBill} />
               </VStack>
               <VStack spacing={rpt(6)} frame={{ maxWidth: Infinity }}>
-                <GridItem label="上期电量" value={lastUsage} />
+                <GridItem label="上期电量" value={lastUsageText} />
                 <GridItem label="年度电量" value={yearUsage} />
               </VStack>
             </HStack>
