@@ -550,7 +550,7 @@ function LineChart({ data, height = 120, isMonthly = false }: { data: BarData[];
 function WidgetView({ displayData, barData, largeWidgetData, settings, logoPath, rawData }: any) {
   const family = Widget.family
   const isTransparent = isTransparentWidget
-  const { balance, hasArrear, lastBill, lastUsage, yearBill, yearUsage, totalYearPq } = displayData
+  const { balance, hasArrear, lastBill, lastUsage, yearBill, yearUsage, totalYearPq, currentMonthUsage } = displayData
 
   const Logo = () => logoPath ? (
     <Image filePath={logoPath} resizable frame={{ width: rpt(30), height: rpt(30) }} clipShape={{ type: "capsule", style: "continuous" }} />
@@ -621,6 +621,7 @@ function WidgetView({ displayData, barData, largeWidgetData, settings, logoPath,
 
           {/* Bottom Info */}
           <VStack alignment="leading" spacing={2}>
+            <Text font={rpt(11)} foregroundStyle={C.textSecondary} lineLimit={1}>本月用量 {Number(currentMonthUsage || 0).toFixed(0)} 度</Text>
             <Text font={rpt(12)} foregroundStyle={C.textSecondary}>{lastBill !== "0.00" ? `余额(上期:${lastBill})` : '剩余电费'}</Text>
             <HStack alignment="center">
               <Text font={rpt(24)} fontWeight="bold" fontDesign="rounded" foregroundStyle={C.textPrimary} minScaleFactor={0.5} lineLimit={1}>{balance}</Text>
