@@ -1,0 +1,116 @@
+// 网上国网-余额修正版
+// Scriptable 原生单文件版本：优先显示 accountBalance / prepayBal，避免把 sumMoney 当余额。
+
+const API_URL = 'http://api.wsgw-rewrite.com/electricity/bill/all?monthElecQuantity=1&dayElecQuantity31=1&stepElecQuantity=1&eleBill=1'
+
+async function fetchData() {
+  const req = new Request(API_URL)
+  req.timeoutInterval = 30
+  const data = await req.loadJSON()
+  return Array.isArray(data) ? data[0] : data
+}
+
+function getBalance(data) {
+  return data?.eleBill?.accountBalance ?? data?.eleBill?.prepayBal ?? data?.eleBill?.sumMoney ?? '0.00'
+}
+
+function getLastBill(data) {
+  const list = data?.monthElecQuantity?.mothEleList || []
+  const last = list[list.length - 1]
+  if (last) return last.monthEleCost ?? last.cost ?? last.eleCost ?? '0.00'
+  const p = data?.stepElecQuantity?.[0]?.electricParticulars
+  return p?.totalAmount ?? '0.00'
+}
+
+function getLastUsage(data) {
+  const list = data?.monthElecQuantity?.mothEleList || []
+  const last = list[list.length - 1]
+  if (last) return last.monthEleNum ?? last.eleNum ?? last.usage ?? '0'
+  const p = data?.stepElecQuantity?.[0]?.electricParticulars
+  return p?.totalPq ?? '0'
+}
+
+function getCurrentMonthUsage(data) {
+  const now = new Date()
+  const prefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`
+  const list = data?.dayElecQuantity31?.sevenEleList || []
+  return list
+    .filter(item => String(item?.day || '').startsWith(prefix))
+    .reduce((sum, item) => sum + (Number(item?.dayElePq) || 0), 0)
+}
+
+function buildWidget(data) {
+  const balance = getBalance(data)
+  const hasArrear = !!data?.arrearsOfFees
+  const lastBill = getLastBill(data)
+  const lastUsage = getLastUsage(data)
+  const monthUsage = getCurrentMonthUsage(data)
+  const dateText = new Date().toLocaleString('zh-CN', {
+    month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
+  })
+
+  const w = new ListWidget()
+  w.setPadding(16, 16, 16, 16)
+  w.backgroundColor = new Color('#0B3D3A')
+
+  const title = w.addText(hasArrear ? '待缴电费' : '剩余电费')
+  title.textColor = Color.white()
+  title.font = Font.semiboldSystemFont(13)
+
+  w.addSpacer(4)
+
+  const month = w.addText(`本月已用 ${monthUsage.toFixed(2)} 度`)
+  month.textColor = new Color('#D8ECEA')
+  month.font = Font.systemFont(12)
+
+  w.addSpacer(6)
+
+  const bal = w.addText(String(balance))
+  bal.textColor = Color.white()
+  bal.font = Font.boldSystemFont(34)
+  bal.minimumScaleFactor = 0.6
+
+  w.addSpacer(8)
+
+  const sub = w.addText(`上期 ${lastBill} 元 · 上期电量 ${lastUsage} 度`)
+  sub.textColor = new Color('#D8ECEA')
+  sub.font = Font.systemFont(11)
+
+  w.addSpacer(8)
+
+  const footer = w.addText(`更新于 ${dateText}`)
+  footer.textColor = new Color('#B6D2CF')
+  footer.font = Font.systemFont(9)
+
+  return w
+}
+
+async function main() {
+  try {
+    const data = await fetchData()
+    const widget = buildWidget(data)
+    if (config.runsInWidget) {
+      Script.setWidget(widget)
+      Script.complete()
+    } else {
+      await widget.presentMedium()
+    }
+  } catch (e) {
+    const w = new ListWidget()
+    w.backgroundColor = Color.red()
+    const t = w.addText('获取失败')
+    t.textColor = Color.white()
+    t.font = Font.boldSystemFont(18)
+    const msg = w.addText(String(e))
+    msg.textColor = Color.white()
+    msg.font = Font.systemFont(11)
+    if (config.runsInWidget) {
+      Script.setWidget(w)
+      Script.complete()
+    } else {
+      await w.presentMedium()
+    }
+  }
+}
+
+await main()
